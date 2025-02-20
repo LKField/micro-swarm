@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <WiFi.h>
 #include "Config.h"
 #include "FunctionRegistry.h"
 #include "AIController.h"

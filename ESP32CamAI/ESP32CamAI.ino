@@ -4,6 +4,7 @@
 #include "DisplaySetup.h"
 #include "FunctionRegistry.h"
 #include "AIController.h"
+#include <WiFi.h>
 
 // Global objects
 WiFiClientSecure client;
