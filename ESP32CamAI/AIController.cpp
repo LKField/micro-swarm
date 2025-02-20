@@ -13,7 +13,7 @@ bool AIController::processImage(const char* base64Image, const String& available
 
     String prompt = String(OpenAIConfig::BASE_PROMPT) + 
                    String(OpenAIConfig::GOAL) + 
-                   "Actions: \n" + availableActions;
+                   "Actions: \\n" + availableActions;
 
     bool success = chatGPT.vision_question(
         OpenAIConfig::MODEL,
@@ -41,8 +41,8 @@ bool AIController::processTextData(const String& inputData, const String& availa
   }
   String prompt = String(OpenAIConfig::BASE_PROMPT) + 
                   String(OpenAIConfig::GOAL) +
-                  "Input Data: \n" + inputData;
-                  "Actions: \n" + availableActions;
+                  "Input Data: \\n" + inputData;
+                  "Actions: \\n" + availableActions;
   
   bool success = chatGPT.chat_message(
     OpenAIConfig::MODEL, 
