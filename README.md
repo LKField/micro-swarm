@@ -24,11 +24,11 @@ This is a project by [Carlos Silveira](https://carlossilveiradesign.gitbook.io/m
     ├── MQTTsend
     │   ├── MQTTsend.ino
     │   ├── Config.cpp
-    │   ├── Config.h
+    │   └── Config.h
 	├── MQTTreceive
     │   ├── MQTTreceive.ino
     │   ├── Config.cpp
-    │   ├── Config.h
+    │   └── Config.h
 
     └── README.md
 ```
