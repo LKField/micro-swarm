@@ -41,6 +41,8 @@ This project is protected under the [SELECT-A-LICENSE](https://choosealicense.co
 
 ##  Acknowledgments
 
+- Code cloned from Extended Intelligences [MDEF Repo](https://github.com/matta-pie/MDEF)
 - References from [Sending Data over MQTT](https://docs.arduino.cc/tutorials/uno-wifi-rev2/uno-wifi-r2-mqtt-device-to-device/).
+
 
 ---
