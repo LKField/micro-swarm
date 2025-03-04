@@ -1,6 +1,8 @@
+# Micro Swarm 
+
 ##  Overview
 
-Micro Swarm is a project for the MDEF01 2024-2025 Course to test 'swarm intelligence' using a series of Barduino (ESP32) devices. With an input from a human user, a note will be played on a single 'reference' device. Using OpenAI, a harmonizing note or melody will be determined and relayed to the 'cell' devices via MQTT. The 'cell' devices will then play the note/melody to create 'swarm music'. 
+Micro Swarm is a project for the MDEF01 2024-2025 Course to test 'swarm intelligence' using a series of [Barduino (ESP32)](https://fablabbcn-projects.gitlab.io/electronics/barduino-docs/) devices. With an input from a human user, a note will be played on a single 'reference' device. Using OpenAI, a harmonizing note or melody will be determined and relayed to the 'cell' devices via MQTT. The 'cell' devices will then play the note/melody to create 'swarm music'. 
 
 This is a project by [Carlos Silveira](https://carlossilveiradesign.gitbook.io/mdef-diary), [Flavio Grimaldi](https://flavio-grimaldi-students-iaac.gitbook.io/mdef_flavio_grimaldi), and [Lucretia Field](https://lkfield.github.io/mdef/). 
 
