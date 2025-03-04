@@ -41,9 +41,11 @@ bool AIController::processTextData(const String& inputData, const String& availa
   }
   String prompt = String(OpenAIConfig::BASE_PROMPT) + 
                   String(OpenAIConfig::GOAL) +
-                  "Input Data: \\n" + inputData;
+                  "Input Data: \\n" + inputData +
                   "Actions: \\n" + availableActions;
-  
+
+  Serial.println(prompt);
+
   bool success = chatGPT.chat_message(
     OpenAIConfig::MODEL, 
     "user", 
@@ -51,7 +53,7 @@ bool AIController::processTextData(const String& inputData, const String& availa
     OpenAIConfig::MAX_TOKENS, 
     true, 
     result, 
-    false
+    true
   );
 
   if (success) {

@@ -33,7 +33,67 @@ String read_room_temperature() {
 
 // Buzzer functions
 String play_melody() {
-  tone(PinConfig::BUZZER, NOTE_G3, 8);
+  tone(PinConfig::BUZZER, NOTE_C3, 8);
+}
+
+String melody_01() {
+  Serial.println("melody 01");
+  for (int i = 0; i < 3; i++) {
+    tone(PinConfig::BUZZER, NOTE_C2, 500);
+    //delay(1000);
+    //noTone(PinConfig::BUZZER);
+    delay(1000);
+  }
+  Serial.println("melody 01 - done");
+  return "";
+}
+
+String melody_02() {
+  Serial.println("melody 02");
+  for (int i = 0; i < 3; i++) {
+    tone(PinConfig::BUZZER, NOTE_C4, 500);
+    //delay(1000);
+    //noTone(PinConfig::BUZZER);
+    delay(1000);
+  }
+  Serial.println("melody 02 - done");
+  return "";
+}
+
+String melody_03() {
+  Serial.println("melody 03");
+  for (int i = 0; i < 3; i++) {
+    tone(PinConfig::BUZZER, NOTE_C5, 500);
+    //delay(1000);
+    //noTone(PinConfig::BUZZER);
+    delay(1000);
+  }
+  Serial.println("melody 03 - done");
+  return "";
+}
+
+String melody_04() {
+  Serial.println("melody 04");
+  for (int i = 0; i < 3; i++) {
+    tone(PinConfig::BUZZER, NOTE_C6, 500);
+    //delay(1000);
+    //noTone(PinConfig::BUZZER);
+    delay(1000);
+  }
+  Serial.println("melody 04 - done");
+  return "";
+}
+
+String melody_05() {
+  Serial.println("melody 05");
+  for (int i = 0; i < 3; i++) {
+    tone(PinConfig::BUZZER, NOTE_C8, 500);
+    //delay(1000);
+    //noTone(PinConfig::BUZZER);
+    delay(1000);
+  }
+  Serial.println("melody 05 - done");
+  return "";
 }
 
 void setupWiFi() {
@@ -58,15 +118,21 @@ void setup() {
   client.setInsecure();
   
   // Init LED
-  pinMode(PinConfig::ONBOARD_LED, OUTPUT);
+ // pinMode(PinConfig::ONBOARD_LED, OUTPUT);
   // Init photo transistor
   pinMode(PinConfig::PHOTO_TRANSISTOR, INPUT);
 
   
   // Setup function registry
-  funcRegistry.attachFunction("TURN_ON_LED", turn_on_led);
-  funcRegistry.attachFunction("TURN_OFF_LED", turn_off_led);
-  funcRegistry.attachFunction("PLAY_MELODY", play_melody);
+//  funcRegistry.attachFunction("TURN_ON_LED", turn_on_led);
+//  funcRegistry.attachFunction("TURN_OFF_LED", turn_off_led);
+//  funcRegistry.attachFunction("PLAY_MELODY", play_melody);
+  funcRegistry.attachFunction("PLAY_MELODY_GLOOMY", melody_01);
+  funcRegistry.attachFunction("PLAY_MELODY_SAD", melody_02);
+  funcRegistry.attachFunction("PLAY_MELODY_NEUTRAL", melody_03);
+  funcRegistry.attachFunction("PLAY_MELODY_HAPPY", melody_04);
+  funcRegistry.attachFunction("PLAY_MELODY_EXCITED", melody_05);
+
   
   // Initialize AI controller
   aiController = new AIController(client);
@@ -79,16 +145,19 @@ void loop() {
 
     // Get AI response
     String result;
+
     
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
         Serial.printf("AI Response: %s\n", result.c_str());
         
         if (auto func = funcRegistry.getFunctionByName(result)) {
+            Serial.print("FUNCTION");
+            Serial.println(result);
             func();
         }
     } else {
         Serial.printf("AI Error: %s\n", result.c_str());
     }
     
-    delay(5000);
+    delay(1000);
 }
