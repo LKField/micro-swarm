@@ -21,15 +21,22 @@ This is a project by [Carlos Silveira](https://carlossilveiradesign.gitbook.io/m
     │   ├── FunctionRegistry.cpp
     │   ├── FunctionRegistry.h
     │   └── pitches.h
-    ├── MQTTsend
+    ├── MQTTsend - Obsolete 
     │   ├── MQTTsend.ino
     │   ├── Config.cpp
     │   └── Config.h
-	├── MQTTreceive
+	├── MQTTreceive - Obsolete
     │   ├── MQTTreceive.ino
     │   ├── Config.cpp
     │   └── Config.h
-
+	├── mqtt_reference - Current
+    │   ├── mqtt_reference.ino
+    │   ├── Config.cpp
+    │   └── Config.h
+	├── mqtt_cell1 - Current
+    │   ├── mqtt_cell1.ino
+    │   ├── Config.cpp
+    │   └── Config.h
     └── README.md
 ```
 

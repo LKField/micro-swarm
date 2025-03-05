@@ -13,7 +13,7 @@ struct PinConfig {
     static const int ONBOARD_LED;
     static const int BUZZER;
     static const int NEOPIXEL;
+    static const int TOUCH_SENSOR_1;
 };
-
 
 #endif

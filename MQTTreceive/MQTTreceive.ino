@@ -1,5 +1,6 @@
 #include <ArduinoMqttClient.h>
 #include <WiFi.h>
+#include <Adafruit_NeoPixel.h>
 #include "Config.h"
 #include "arduino_secrets.h"
 
@@ -13,6 +14,8 @@ const char topic[]  = "real_unique_topic";
 const char topic2[]  = "real_unique_topic_2";
 const char topic3[]  = "real_unique_topic_3";
 
+Adafruit_NeoPixel pixels(1, PinConfig::NEOPIXEL, NEO_GRB + NEO_KHZ800);
+
 void setupWiFi() {
     WiFi.mode(WIFI_STA);
     Serial.printf("Connecting to %s\n", WiFiConfig::SSID);
@@ -20,8 +23,15 @@ void setupWiFi() {
     
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
-        delay(500);
+        pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+        pixels.show();  // Send the updated pixel colors to the hardware.
+        digitalWrite(PinConfig::ONBOARD_LED, HIGH);  // turn the LED on (HIGH is the voltage level)
+        delay(250);
+        digitalWrite(PinConfig::ONBOARD_LED, LOW);   // turn the LED off by making the voltage LOW
+        delay(250);
     }
+    
+    digitalWrite(PinConfig::ONBOARD_LED, HIGH);  // turn the LED on (HIGH is the voltage level)
 
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
