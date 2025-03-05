@@ -15,85 +15,88 @@ TI_TMP102 temperature;
 // LED control functions
 String turn_on_led() {
     digitalWrite(PinConfig::ONBOARD_LED, HIGH);
+    return "";
 }
 
 String turn_off_led() {
     digitalWrite(PinConfig::ONBOARD_LED, LOW);
+    return "";
 }
 
 // Light sensor functions
 String read_room_light() {
-  return String(analogRead(PinConfig::PHOTO_TRANSISTOR));
+    return String(analogRead(PinConfig::PHOTO_TRANSISTOR));
 }
 
 // Temperature sensor functions
 String read_room_temperature() {
-  return String(temperature.readTemperatureC());
+    return String(temperature.readTemperatureC());
 }
 
 // Buzzer functions
 String play_melody() {
-  tone(PinConfig::BUZZER, NOTE_C3, 8);
+    tone(PinConfig::BUZZER, NOTE_C3, 8);
+    return "";
 }
 
 String melody_01() {
-  Serial.println("melody 01");
-  for (int i = 0; i < 3; i++) {
-    tone(PinConfig::BUZZER, NOTE_C2, 500);
-    //delay(1000);
-    //noTone(PinConfig::BUZZER);
-    delay(1000);
-  }
-  Serial.println("melody 01 - done");
-  return "";
+    Serial.println("melody 01");
+    for (int i = 0; i < 3; i++) {
+        tone(PinConfig::BUZZER, NOTE_C2, 500);
+        delay(1000);
+    }
+    Serial.println("melody 01 - done");
+    return "";
 }
 
 String melody_02() {
-  Serial.println("melody 02");
-  for (int i = 0; i < 3; i++) {
-    tone(PinConfig::BUZZER, NOTE_C4, 500);
-    //delay(1000);
-    //noTone(PinConfig::BUZZER);
-    delay(1000);
-  }
-  Serial.println("melody 02 - done");
-  return "";
+    Serial.println("melody 02");
+    for (int i = 0; i < 3; i++) {
+        tone(PinConfig::BUZZER, NOTE_C4, 500);
+        delay(1000);
+    }
+    Serial.println("melody 02 - done");
+    return "";
 }
 
 String melody_03() {
-  Serial.println("melody 03");
-  for (int i = 0; i < 3; i++) {
-    tone(PinConfig::BUZZER, NOTE_C5, 500);
-    //delay(1000);
-    //noTone(PinConfig::BUZZER);
-    delay(1000);
-  }
-  Serial.println("melody 03 - done");
-  return "";
+    Serial.println("melody 03");
+    for (int i = 0; i < 3; i++) {
+        tone(PinConfig::BUZZER, NOTE_C5, 500);
+        delay(1000);
+    }
+    Serial.println("melody 03 - done");
+    return "";
 }
 
 String melody_04() {
-  Serial.println("melody 04");
-  for (int i = 0; i < 3; i++) {
-    tone(PinConfig::BUZZER, NOTE_C6, 500);
-    //delay(1000);
-    //noTone(PinConfig::BUZZER);
-    delay(1000);
-  }
-  Serial.println("melody 04 - done");
-  return "";
+    Serial.println("melody 04");
+    for (int i = 0; i < 3; i++) {
+        tone(PinConfig::BUZZER, NOTE_C6, 500);
+        delay(1000);
+    }
+    Serial.println("melody 04 - done");
+    return "";
 }
 
 String melody_05() {
-  Serial.println("melody 05");
-  for (int i = 0; i < 3; i++) {
-    tone(PinConfig::BUZZER, NOTE_C8, 500);
-    //delay(1000);
-    //noTone(PinConfig::BUZZER);
-    delay(1000);
-  }
-  Serial.println("melody 05 - done");
-  return "";
+    Serial.println("melody 05");
+    for (int i = 0; i < 3; i++) {
+        tone(PinConfig::BUZZER, NOTE_C8, 500);
+        delay(1000);
+    }
+    Serial.println("melody 05 - done");
+    return "";
+}
+
+String readSerialAndPlayTone() {
+    if (Serial.available()) {
+        char inputChar = Serial.read(); // Read a single character
+        int frequency = map(inputChar, 32, 126, 200, 2000); // Map ASCII range to frequency
+        tone(PinConfig::BUZZER, frequency, 200); // Play sound for 200ms
+        delay(250); // Small delay before next character
+    }
+    return "";
 }
 
 void setupWiFi() {
@@ -110,32 +113,26 @@ void setupWiFi() {
 }
 
 void setup() {
-  Wire.begin();
-  Serial.begin(115200);
-      
-  // Setup network
-  setupWiFi();
-  client.setInsecure();
-  
-  // Init LED
- // pinMode(PinConfig::ONBOARD_LED, OUTPUT);
-  // Init photo transistor
-  pinMode(PinConfig::PHOTO_TRANSISTOR, INPUT);
-
-  
-  // Setup function registry
-//  funcRegistry.attachFunction("TURN_ON_LED", turn_on_led);
-//  funcRegistry.attachFunction("TURN_OFF_LED", turn_off_led);
-//  funcRegistry.attachFunction("PLAY_MELODY", play_melody);
-  funcRegistry.attachFunction("PLAY_MELODY_GLOOMY", melody_01);
-  funcRegistry.attachFunction("PLAY_MELODY_SAD", melody_02);
-  funcRegistry.attachFunction("PLAY_MELODY_NEUTRAL", melody_03);
-  funcRegistry.attachFunction("PLAY_MELODY_HAPPY", melody_04);
-  funcRegistry.attachFunction("PLAY_MELODY_EXCITED", melody_05);
-
-  
-  // Initialize AI controller
-  aiController = new AIController(client);
+    Wire.begin();
+    Serial.begin(115200);
+    
+    // Setup network
+    setupWiFi();
+    client.setInsecure();
+    
+    // Init photo transistor
+    pinMode(PinConfig::PHOTO_TRANSISTOR, INPUT);
+    
+    // Setup function registry
+    funcRegistry.attachFunction("PLAY_MELODY_GLOOMY", melody_01);
+    funcRegistry.attachFunction("PLAY_MELODY_SAD", melody_02);
+    funcRegistry.attachFunction("PLAY_MELODY_NEUTRAL", melody_03);
+    funcRegistry.attachFunction("PLAY_MELODY_HAPPY", melody_04);
+    funcRegistry.attachFunction("PLAY_MELODY_EXCITED", melody_05);
+    funcRegistry.attachFunction("PLAY_MELODY_INPUT", readSerialAndPlayTone);
+    
+    // Initialize AI controller
+    aiController = new AIController(client);
 }
 
 void loop() {
@@ -145,7 +142,6 @@ void loop() {
 
     // Get AI response
     String result;
-
     
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
         Serial.printf("AI Response: %s\n", result.c_str());
