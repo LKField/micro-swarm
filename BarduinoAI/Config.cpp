@@ -20,7 +20,7 @@ const int OpenAIConfig::MAX_TOKENS = 2000;
 //                                "The light range is from 100 to 4095, which must include four different mood options. \\n"
 //                                "Then choose a melody that matches that mood using the melody function descriptions and play just that melody function for five seconds. \\n"
 //                                "Then check the light sensor again and play another melody based on the new light reading. \\n";
-const char* OpenAIConfig::GOAL = "Goal: Considering the relation between this list of numbers to the musical notes (B0 = 1; C1 = 2; CS1 = 3; ... D8 = 88;) give me three numbers in JSON array of three intgers without any text, that harmonize with this number: \\n";
+const char* OpenAIConfig::GOAL = "Goal: Considering the relation between this list of numbers to the musical notes (B0 = 1; C1 = 2; CS1 = 3; ... D8 = 88;) give me three numbers in array of three intgers without any text, that harmonize with this number: \\n";
 
 
 

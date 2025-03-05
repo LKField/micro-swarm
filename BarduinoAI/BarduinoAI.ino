@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "pitches.h"
 #include <Temperature_LM75_Derived.h>
+#include <ArduinoJson.h>
 
 // Global objects
 WiFiClientSecure client;
@@ -14,9 +15,7 @@ TI_TMP102 temperature;
 
 const int buzzerPin = 46;  // Change if needed for Arduino
 
-
 // ---------------------------------------MUSICAL NOTES---------------------------------------
-
 
 int notes[] = {
   B0, C1, CS1, D1, DS1, E1, F1, FS1, G1, GS1, A1, AS1, B1,
@@ -29,7 +28,6 @@ int notes[] = {
   C8, CS8, D8, DS8};
 
 const int numNotes = sizeof(notes) / sizeof(notes[0]);
-int selectedNote = 0;  // Variable to store the serial input number
 
 void setup() {
   Wire.begin();
@@ -41,37 +39,56 @@ void setup() {
   
   pinMode(buzzerPin, OUTPUT);
 
-  
   // Initialize AI controller
   aiController = new AIController(client);
 }
 
-void readSerialAndPlayTone() {
-    if (Serial.available() > 0) {
-        selectedNote = Serial.parseInt();  // Store the input number
+void playHarmonizedNotes(int note1, int note2, int note3) {
+    if (note1 >= 1 && note1 <= numNotes && note2 >= 1 && note2 <= numNotes && note3 >= 1 && note3 <= numNotes) {
+        int frequency1 = notes[note1 - 1];
+        int frequency2 = notes[note2 - 1];
+        int frequency3 = notes[note3 - 1];
 
-        if (selectedNote >= 1 && selectedNote <= numNotes) {
-            int noteIndex = selectedNote - 1;  // Adjust for array index
-            int frequency = notes[noteIndex];
+        tone(buzzerPin, frequency1, 500);
+        delay(600);
+        tone(buzzerPin, frequency2, 500);
+        delay(600);
+        tone(buzzerPin, frequency3, 500);
+        delay(600);
+    } else {
+        Serial.println("Invalid notes received");
+    }
+}
 
-            Serial.print("Playing note ");
-            Serial.print(selectedNote);
-            Serial.print(" at ");
-            Serial.print(frequency);
-            Serial.println(" Hz");
+void readSerialAndPlayHarmonizedNotes() {
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n');
+        input.trim();  // Remove any leading or trailing whitespace
 
-            tone(buzzerPin, frequency, 300);
-            delay(5);  // Small delay before next input
+        if (input.startsWith("[") && input.endsWith("]")) {
+            input.remove(0, 1);  // Remove the leading '['
+            input.remove(input.length() - 1, 1);  // Remove the trailing ']'
+            input.replace(" ", "");  // Remove any remaining spaces
+
+            int commaIndex1 = input.indexOf(',');
+            int commaIndex2 = input.indexOf(',', commaIndex1 + 1);
+
+            if (commaIndex1 != -1 && commaIndex2 != -1) {
+                int note1 = input.substring(0, commaIndex1).toInt();
+                int note2 = input.substring(commaIndex1 + 1, commaIndex2).toInt();
+                int note3 = input.substring(commaIndex2 + 1).toInt();
+
+                playHarmonizedNotes(note1, note2, note3);
+            } else {
+                Serial.println("Invalid input format");
+            }
         } else {
-            Serial.println("");
+            Serial.println("Invalid input format");
         }
     }
 }
 
-
-
 // ---------------------------------------SETUP WIFI---------------------------------------
-
 
 void setupWiFi() {
     WiFi.mode(WIFI_STA);
@@ -86,9 +103,7 @@ void setupWiFi() {
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
 
-
 // ---------------------------------------SETUP AI---------------------------------------
-
 
 void setupAI() {
   Wire.begin();
@@ -98,16 +113,11 @@ void setupAI() {
   setupWiFi();
   client.setInsecure();
   
-  // Setup function registry
-  //funcRegistry.attachFunction("TURN_ON_LED", turn_on_led);
-  
   // Initialize AI controller
   aiController = new AIController(client);
 }
 
-
 // ---------------------------------------AI RESPONSE---------------------------------------
-
 
 void loop() {
     // Capture sensor data here
@@ -119,15 +129,20 @@ void loop() {
     
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
         Serial.printf("AI Response: %s\n", result.c_str());
-        
-        if (auto func = funcRegistry.getFunctionByName(result)) {
-            func();
+        StaticJsonDocument<64> doc;
+        DeserializationError error = deserializeJson(doc, result);
+        // Check if parsing was successful
+        if (error) {
+            Serial.print("JSON Parsing Failed: ");
+            Serial.println(error.f_str());
+            return;
         }
+        playHarmonizedNotes(doc[0], doc[1], doc[2]);
     } else {
         Serial.printf("AI Error: %s\n", result.c_str());
     }
     
     delay(5000);
 
-    readSerialAndPlayTone();
+    readSerialAndPlayHarmonizedNotes();
 }
