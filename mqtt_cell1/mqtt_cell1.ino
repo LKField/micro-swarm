@@ -24,7 +24,6 @@ const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
 const char* mqttUser = "fablabbcn102";
 const char* mqttPass = "";
-//const char* topicToPub = "lab/lucretia/cell1";
 const char* topicToSub = "lab/lucretia/cell1";
 
 WiFiClient wifiClient;
@@ -40,8 +39,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println();
 }
 
-
-
 void mqttConnect() {
   // Loop until we're reconnected
   while (!mqttClient.connected()) {
@@ -49,21 +46,21 @@ void mqttConnect() {
     // Attempt to connect
     if (mqttClient.connect(mqttClientName, mqttUser, mqttPass)) {
       Serial.println("connected");
-      // Publishing 
-      // mqttClient.publish(topicToPub, out);
-      // Serial.print("published to: ");
-      // Serial.println(topicToPub);
 
       // Subscribing
       mqttClient.subscribe(topicToSub);
       Serial.print("subscribed to: ");
       Serial.println(topicToSub);
 
-      
+      // Publishing 
+      // mqttClient.publish(topicToPub, "hello there!");
+      // Serial.print("published to: ");
+      // Serial.println(topicToPub);
+
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" try again in 1 second");
       // Wait 1 seconds before retrying
       delay(1000);
     }
@@ -84,7 +81,7 @@ void setupWiFi() {
 
 void setup()
 {
-  Serial.begin(57600);
+  Serial.begin(9600);
 
     // Setup network
   setupWiFi();

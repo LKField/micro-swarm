@@ -64,7 +64,7 @@ void mqttConnect() {
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" try again in 1 seconds");
       // Wait 1 seconds before retrying
       delay(1000);
     }
