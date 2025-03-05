@@ -12,92 +12,66 @@ FunctionRegistry funcRegistry;
 AIController* aiController;
 TI_TMP102 temperature;
 
-// LED control functions
-String turn_on_led() {
-    digitalWrite(PinConfig::ONBOARD_LED, HIGH);
-    return "";
+const int buzzerPin = 46;  // Change if needed for Arduino
+
+
+// ---------------------------------------MUSICAL NOTES---------------------------------------
+
+
+int notes[] = {
+  B0, C1, CS1, D1, DS1, E1, F1, FS1, G1, GS1, A1, AS1, B1,
+  C2, CS2, D2, DS2, E2, F2, FS2, G2, GS2, A2, AS2, B2,
+  C3, CS3, D3, DS3, E3, F3, FS3, G3, GS3, A3, AS3, B3,
+  C4, CS4, D4, DS4, E4, F4, FS4, G4, GS4, A4, AS4, B4,
+  C5, CS5, D5, DS5, E5, F5, FS5, G5, GS5, A5, AS5, B5,
+  C6, CS6, D6, DS6, E6, F6, FS6, G6, GS6, A6, AS6, B6,
+  C7, CS7, D7, DS7, E7, F7, FS7, G7, GS7, A7, AS7, B7,
+  C8, CS8, D8, DS8};
+
+const int numNotes = sizeof(notes) / sizeof(notes[0]);
+int selectedNote = 0;  // Variable to store the serial input number
+
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+      
+  // Setup network
+  setupWiFi();
+  client.setInsecure();
+  
+  pinMode(buzzerPin, OUTPUT);
+
+  
+  // Initialize AI controller
+  aiController = new AIController(client);
 }
 
-String turn_off_led() {
-    digitalWrite(PinConfig::ONBOARD_LED, LOW);
-    return "";
-}
+void readSerialAndPlayTone() {
+    if (Serial.available() > 0) {
+        selectedNote = Serial.parseInt();  // Store the input number
 
-// Light sensor functions
-String read_room_light() {
-    return String(analogRead(PinConfig::PHOTO_TRANSISTOR));
-}
+        if (selectedNote >= 1 && selectedNote <= numNotes) {
+            int noteIndex = selectedNote - 1;  // Adjust for array index
+            int frequency = notes[noteIndex];
 
-// Temperature sensor functions
-String read_room_temperature() {
-    return String(temperature.readTemperatureC());
-}
+            Serial.print("Playing note ");
+            Serial.print(selectedNote);
+            Serial.print(" at ");
+            Serial.print(frequency);
+            Serial.println(" Hz");
 
-// Buzzer functions
-String play_melody() {
-    tone(PinConfig::BUZZER, NOTE_C3, 8);
-    return "";
-}
-
-String melody_01() {
-    Serial.println("melody 01");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C2, 500);
-        delay(1000);
+            tone(buzzerPin, frequency, 300);
+            delay(5);  // Small delay before next input
+        } else {
+            Serial.println("");
+        }
     }
-    Serial.println("melody 01 - done");
-    return "";
 }
 
-String melody_02() {
-    Serial.println("melody 02");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C4, 500);
-        delay(1000);
-    }
-    Serial.println("melody 02 - done");
-    return "";
-}
 
-String melody_03() {
-    Serial.println("melody 03");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C5, 500);
-        delay(1000);
-    }
-    Serial.println("melody 03 - done");
-    return "";
-}
 
-String melody_04() {
-    Serial.println("melody 04");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C6, 500);
-        delay(1000);
-    }
-    Serial.println("melody 04 - done");
-    return "";
-}
+// ---------------------------------------SETUP WIFI---------------------------------------
 
-String melody_05() {
-    Serial.println("melody 05");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C8, 500);
-        delay(1000);
-    }
-    Serial.println("melody 05 - done");
-    return "";
-}
-
-String readSerialAndPlayTone() {
-    if (Serial.available()) {
-        char inputChar = Serial.read(); // Read a single character
-        int frequency = map(inputChar, 32, 126, 200, 2000); // Map ASCII range to frequency
-        tone(PinConfig::BUZZER, frequency, 200); // Play sound for 200ms
-        delay(250); // Small delay before next character
-    }
-    return "";
-}
 
 void setupWiFi() {
     WiFi.mode(WIFI_STA);
@@ -112,32 +86,32 @@ void setupWiFi() {
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
 
-void setup() {
-    Wire.begin();
-    Serial.begin(115200);
-    
-    // Setup network
-    setupWiFi();
-    client.setInsecure();
-    
-    // Init photo transistor
-    pinMode(PinConfig::PHOTO_TRANSISTOR, INPUT);
-    
-    // Setup function registry
-    funcRegistry.attachFunction("PLAY_MELODY_GLOOMY", melody_01);
-    funcRegistry.attachFunction("PLAY_MELODY_SAD", melody_02);
-    funcRegistry.attachFunction("PLAY_MELODY_NEUTRAL", melody_03);
-    funcRegistry.attachFunction("PLAY_MELODY_HAPPY", melody_04);
-    funcRegistry.attachFunction("PLAY_MELODY_EXCITED", melody_05);
-    funcRegistry.attachFunction("PLAY_MELODY_INPUT", readSerialAndPlayTone);
-    
-    // Initialize AI controller
-    aiController = new AIController(client);
+
+// ---------------------------------------SETUP AI---------------------------------------
+
+
+void setupAI() {
+  Wire.begin();
+  Serial.begin(115200);
+      
+  // Setup network
+  setupWiFi();
+  client.setInsecure();
+  
+  // Setup function registry
+  //funcRegistry.attachFunction("TURN_ON_LED", turn_on_led);
+  
+  // Initialize AI controller
+  aiController = new AIController(client);
 }
+
+
+// ---------------------------------------AI RESPONSE---------------------------------------
+
 
 void loop() {
     // Capture sensor data here
-    String inputData = "Room light: " + read_room_light() + ", Room temperature: " + read_room_temperature();
+    String inputData = "78";
     Serial.printf("Input data: %s\n", inputData.c_str());
 
     // Get AI response
@@ -147,13 +121,13 @@ void loop() {
         Serial.printf("AI Response: %s\n", result.c_str());
         
         if (auto func = funcRegistry.getFunctionByName(result)) {
-            Serial.print("FUNCTION");
-            Serial.println(result);
             func();
         }
     } else {
         Serial.printf("AI Error: %s\n", result.c_str());
     }
     
-    delay(1000);
+    delay(5000);
+
+    readSerialAndPlayTone();
 }
