@@ -39,10 +39,7 @@ bool AIController::processTextData(const String& inputData, const String& availa
   if (successfulCalls >= OpenAIConfig::MAX_CALLS) {
       return false;
   }
-  String prompt = String(OpenAIConfig::BASE_PROMPT) + 
-                  String(OpenAIConfig::GOAL) +
-                  "Input Data: \\n" + inputData +
-                  "Actions: \\n" + availableActions;
+  String prompt = String(OpenAIConfig::GOAL) + inputData;
 
   Serial.println(prompt);
 
