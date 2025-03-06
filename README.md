@@ -2,9 +2,9 @@
 
 ##  Purpose
 
-Micro Swarm is a project for the MDEF01 2024-2025 Course to test 'swarm intelligence' using a series of [Barduino (ESP32)](https://fablabbcn-projects.gitlab.io/electronics/barduino-docs/) devices. With an input from a human user (vibration sensor), a note will be played on a single 'Reference' device. Using OpenAI, a harmonizing note will be determined and relayed to the 'Cell' devices via MQTT. The 'Cell' devices will then play the note to create 'swarm music'. 
+Micro Swarm is a project for the Micro Challenge Course in the Master in Design for Emergent Futures Year 1 for 2024-2025 to test 'swarm intelligence' using a series of [Barduino (ESP32)](https://fablabbcn-projects.gitlab.io/electronics/barduino-docs/) devices. With an input from a human user (vibration sensor), a note will be played on a single 'Reference' device. Using OpenAI, a harmonizing note will be determined and relayed to the 'Cell' devices via MQTT. The 'Cell' devices will then play the note to create 'swarm music'. 
 
-### Contributors
+## Contributors
 
 - [Carlos Silveira](https://carlossilveiradesign.gitbook.io/mdef-diary): Code for playing notes and OpenAI integration and modeling for carapace 
 - [Flavio Grimaldi](https://flavio-grimaldi-students-iaac.gitbook.io/mdef_flavio_grimaldi): Code for playing notes, sensing environment, and OpenAI integration 
@@ -56,6 +56,8 @@ Micro Swarm is a project for the MDEF01 2024-2025 Course to test 'swarm intellig
     │   └── pitches.h
     └── README.md
 ```
+---
+
 ## Fabrication Process 
 ### The System Structure 
 
@@ -80,14 +82,18 @@ The code for the cells are much simpler. Each Cell subscribes to a topic and the
 ### Iteration Process 
 
 
+---
 
 ## Reference Projects/Inspiration 
 
 
+---
 
 ## Future Project Developments 
 
 From the beginning we were interested in exploring different inputs to the system, for a future iteration of the project, we think it would be very cool to have the potential for the input to come from a MIDI controller where a human could provide a note or series of notes for the 'cicadas' to harmonize with. Instead of mimicking a danger sense in animals in nature, this functionality could allow the human and the 'insects' to work together to create a musical atmosphere. 
+
+---
 
 ##  License
 
