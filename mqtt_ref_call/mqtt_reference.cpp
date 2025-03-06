@@ -1,12 +1,13 @@
 #include "mqtt_reference.h"
 
 // Constructor to initialize the MQTT Client with parameters
-//MQTTWrapper::MQTTWrapper(WiFiClientSecure& wifiClient)
-MQTTWrapper::MQTTWrapper(WiFiClient& wifiClient)
+MQTTWrapper::MQTTWrapper(WiFiClientSecure& wifiClient)
+//MQTTWrapper::MQTTWrapper(WiFiClient& wifiClient)
   : mqttClient(wifiClient) {
 
+  String clientName = "Swarm_Reference";
   this->mqttBroker = "mqtt-staging.smartcitizen.me";
-  this->mqttClientName = "Swarm_Reference";
+  this->mqttClientName = clientName.c_str();
   this->mqttUser = "fablabbcn102";
   this->mqttPass = "";
   this->topicsLength = 3;
