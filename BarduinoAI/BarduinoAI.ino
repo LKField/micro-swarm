@@ -14,6 +14,7 @@ AIController* aiController;
 TI_TMP102 temperature;
 
 const int buzzerPin = 46;  // Change if needed for Arduino
+const int piezoPin = 4; // The piezo sensor pin (change if needed)
 
 // ---------------------------------------MUSICAL NOTES---------------------------------------
 
@@ -29,6 +30,14 @@ int notes[] = {
 
 const int numNotes = sizeof(notes) / sizeof(notes[0]);
 
+// Variables for vibration reading and filtering
+int vibrationReading = 0;
+int limitedReading = 0;
+
+String inputData;
+bool isvibrating = false;
+
+
 void setup() {
   Wire.begin();
   Serial.begin(115200);
@@ -38,6 +47,9 @@ void setup() {
   client.setInsecure();
   
   pinMode(buzzerPin, OUTPUT);
+  pinMode(piezoPin, INPUT);
+
+  Serial.println("Piezo vibration to note demo");
 
   // Initialize AI controller
   aiController = new AIController(client);
@@ -85,9 +97,36 @@ void readSerialAndPlayHarmonizedNotes() {
         } else {
             Serial.println("Invalid input format");
         }
+      
     }
 }
 
+
+void read_vibration() {
+  // Average 10 readings for filtering noise
+  int sum = 0;
+  for (int i = 0; i < 10; i++) {
+    sum += analogRead(piezoPin);
+    delay(10);  // Short delay between samples for smoother reading
+  }
+  vibrationReading = sum / 10;  // Average of 10 readings
+
+  Serial.println(vibrationReading);
+
+  // Limit vibration reading to a range of 0-1023
+  limitedReading = map(vibrationReading, 0, 1023, 0, numNotes - 1);
+
+  // Play the corresponding note based on vibration
+  if (vibrationReading > 200) {  // Threshold to avoid too low vibrations triggering notes
+    inputData = String(limitedReading);
+    isvibrating = true; 
+    Serial.println("isvibrating ");
+    //Serial.println(inputData);
+    Serial.println(limitedReading);
+
+  }
+  delay(100);  // Short delay before next reading
+}
 // ---------------------------------------SETUP WIFI---------------------------------------
 
 void setupWiFi() {
@@ -121,13 +160,16 @@ void setupAI() {
 // ---------------------------------------AI RESPONSE---------------------------------------
 
 void loop() {
+    read_vibration();
     // Capture sensor data here
-    String inputData = "78";
-    Serial.printf("Input data: %s\n", inputData.c_str());
+    //String inputData = "78";
+    //Serial.printf("Input data: %s\n", inputData.c_str());
 
     // Get AI response
     String result;
-    
+
+  if(isvibrating){
+    isvibrating = false;
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
         Serial.printf("AI Response: %s\n", result.c_str());
         StaticJsonDocument<64> doc;
@@ -142,8 +184,9 @@ void loop() {
     } else {
         Serial.printf("AI Error: %s\n", result.c_str());
     }
+   }
     
-    delay(5000);
+    delay(1000);
 
     readSerialAndPlayHarmonizedNotes();
 }
