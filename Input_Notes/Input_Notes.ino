@@ -2,7 +2,8 @@
 
 const int buzzerPin = 46;  // Change if needed for Arduino
 
-// Array storing all pitch values in order
+// NOTES & PITCHES -------------------------------------------
+
 int notes[] = {
   B0, C1, CS1, D1, DS1, E1, F1, FS1, G1, GS1, A1, AS1, B1,
   C2, CS2, D2, DS2, E2, F2, FS2, G2, GS2, A2, AS2, B2,
@@ -15,11 +16,12 @@ int notes[] = {
 };
 
 const int numNotes = sizeof(notes) / sizeof(notes[0]);
+int selectedNote = 0;  // Variable to store the serial input number
 
 void setup() {
     Serial.begin(9600);
     pinMode(buzzerPin, OUTPUT);
-    Serial.println("Enter a number (5-88) to play a pitch:");
+    Serial.println("Enter a number (1-88) to play a pitch:");
 }
 
 void loop() {
@@ -28,20 +30,20 @@ void loop() {
 
 void readSerialAndPlayTone() {
     if (Serial.available() > 0) {
-        int inputNum = Serial.parseInt();  // Read input as an integer
+        selectedNote = Serial.parseInt();  // Store the input number
 
-        if (inputNum >= 1 && inputNum <= numNotes) {
-            int noteIndex = inputNum - 1;  // Adjust for array index
+        if (selectedNote >= 1 && selectedNote <= numNotes) {
+            int noteIndex = selectedNote - 1;  // Adjust for array index
             int frequency = notes[noteIndex];
 
             Serial.print("Playing note ");
-            Serial.print(inputNum);
+            Serial.print(selectedNote);
             Serial.print(" at ");
             Serial.print(frequency);
             Serial.println(" Hz");
 
             tone(buzzerPin, frequency, 300);
-            delay(350);  // Small delay before next input
+            delay(5);  // Small delay before next input
         } else {
             Serial.println("");
         }

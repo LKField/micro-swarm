@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "pitches.h"
 #include <Temperature_LM75_Derived.h>
+#include <ArduinoJson.h>
 
 // Global objects
 WiFiClientSecure client;
@@ -12,92 +13,82 @@ FunctionRegistry funcRegistry;
 AIController* aiController;
 TI_TMP102 temperature;
 
-// LED control functions
-String turn_on_led() {
-    digitalWrite(PinConfig::ONBOARD_LED, HIGH);
-    return "";
+const int buzzerPin = 46;  // Change if needed for Arduino
+
+// ---------------------------------------MUSICAL NOTES---------------------------------------
+
+int notes[] = {
+  B0, C1, CS1, D1, DS1, E1, F1, FS1, G1, GS1, A1, AS1, B1,
+  C2, CS2, D2, DS2, E2, F2, FS2, G2, GS2, A2, AS2, B2,
+  C3, CS3, D3, DS3, E3, F3, FS3, G3, GS3, A3, AS3, B3,
+  C4, CS4, D4, DS4, E4, F4, FS4, G4, GS4, A4, AS4, B4,
+  C5, CS5, D5, DS5, E5, F5, FS5, G5, GS5, A5, AS5, B5,
+  C6, CS6, D6, DS6, E6, F6, FS6, G6, GS6, A6, AS6, B6,
+  C7, CS7, D7, DS7, E7, F7, FS7, G7, GS7, A7, AS7, B7,
+  C8, CS8, D8, DS8};
+
+const int numNotes = sizeof(notes) / sizeof(notes[0]);
+
+void setup() {
+  Wire.begin();
+  Serial.begin(115200);
+      
+  // Setup network
+  setupWiFi();
+  client.setInsecure();
+  
+  pinMode(buzzerPin, OUTPUT);
+
+  // Initialize AI controller
+  aiController = new AIController(client);
 }
 
-String turn_off_led() {
-    digitalWrite(PinConfig::ONBOARD_LED, LOW);
-    return "";
-}
+void playHarmonizedNotes(int note1, int note2, int note3) {
+    if (note1 >= 1 && note1 <= numNotes && note2 >= 1 && note2 <= numNotes && note3 >= 1 && note3 <= numNotes) {
+        int frequency1 = notes[note1 - 1];
+        int frequency2 = notes[note2 - 1];
+        int frequency3 = notes[note3 - 1];
 
-// Light sensor functions
-String read_room_light() {
-    return String(analogRead(PinConfig::PHOTO_TRANSISTOR));
-}
-
-// Temperature sensor functions
-String read_room_temperature() {
-    return String(temperature.readTemperatureC());
-}
-
-// Buzzer functions
-String play_melody() {
-    tone(PinConfig::BUZZER, NOTE_C3, 8);
-    return "";
-}
-
-String melody_01() {
-    Serial.println("melody 01");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C2, 500);
-        delay(1000);
+        tone(buzzerPin, frequency1, 500);
+        delay(600);
+        tone(buzzerPin, frequency2, 500);
+        delay(600);
+        tone(buzzerPin, frequency3, 500);
+        delay(600);
+    } else {
+        Serial.println("Invalid notes received");
     }
-    Serial.println("melody 01 - done");
-    return "";
 }
 
-String melody_02() {
-    Serial.println("melody 02");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C4, 500);
-        delay(1000);
-    }
-    Serial.println("melody 02 - done");
-    return "";
-}
-
-String melody_03() {
-    Serial.println("melody 03");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C5, 500);
-        delay(1000);
-    }
-    Serial.println("melody 03 - done");
-    return "";
-}
-
-String melody_04() {
-    Serial.println("melody 04");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C6, 500);
-        delay(1000);
-    }
-    Serial.println("melody 04 - done");
-    return "";
-}
-
-String melody_05() {
-    Serial.println("melody 05");
-    for (int i = 0; i < 3; i++) {
-        tone(PinConfig::BUZZER, NOTE_C8, 500);
-        delay(1000);
-    }
-    Serial.println("melody 05 - done");
-    return "";
-}
-
-String readSerialAndPlayTone() {
+void readSerialAndPlayHarmonizedNotes() {
     if (Serial.available()) {
-        char inputChar = Serial.read(); // Read a single character
-        int frequency = map(inputChar, 32, 126, 200, 2000); // Map ASCII range to frequency
-        tone(PinConfig::BUZZER, frequency, 200); // Play sound for 200ms
-        delay(250); // Small delay before next character
+        String input = Serial.readStringUntil('\n');
+        input.trim();  // Remove any leading or trailing whitespace
+
+        if (input.startsWith("[") && input.endsWith("]")) {
+            input.remove(0, 1);  // Remove the leading '['
+            input.remove(input.length() - 1, 1);  // Remove the trailing ']'
+            input.replace(" ", "");  // Remove any remaining spaces
+
+            int commaIndex1 = input.indexOf(',');
+            int commaIndex2 = input.indexOf(',', commaIndex1 + 1);
+
+            if (commaIndex1 != -1 && commaIndex2 != -1) {
+                int note1 = input.substring(0, commaIndex1).toInt();
+                int note2 = input.substring(commaIndex1 + 1, commaIndex2).toInt();
+                int note3 = input.substring(commaIndex2 + 1).toInt();
+
+                playHarmonizedNotes(note1, note2, note3);
+            } else {
+                Serial.println("Invalid input format");
+            }
+        } else {
+            Serial.println("Invalid input format");
+        }
     }
-    return "";
 }
+
+// ---------------------------------------SETUP WIFI---------------------------------------
 
 void setupWiFi() {
     WiFi.mode(WIFI_STA);
@@ -112,32 +103,25 @@ void setupWiFi() {
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
 
-void setup() {
-    Wire.begin();
-    Serial.begin(115200);
-    
-    // Setup network
-    setupWiFi();
-    client.setInsecure();
-    
-    // Init photo transistor
-    pinMode(PinConfig::PHOTO_TRANSISTOR, INPUT);
-    
-    // Setup function registry
-    funcRegistry.attachFunction("PLAY_MELODY_GLOOMY", melody_01);
-    funcRegistry.attachFunction("PLAY_MELODY_SAD", melody_02);
-    funcRegistry.attachFunction("PLAY_MELODY_NEUTRAL", melody_03);
-    funcRegistry.attachFunction("PLAY_MELODY_HAPPY", melody_04);
-    funcRegistry.attachFunction("PLAY_MELODY_EXCITED", melody_05);
-    funcRegistry.attachFunction("PLAY_MELODY_INPUT", readSerialAndPlayTone);
-    
-    // Initialize AI controller
-    aiController = new AIController(client);
+// ---------------------------------------SETUP AI---------------------------------------
+
+void setupAI() {
+  Wire.begin();
+  Serial.begin(115200);
+      
+  // Setup network
+  setupWiFi();
+  client.setInsecure();
+  
+  // Initialize AI controller
+  aiController = new AIController(client);
 }
+
+// ---------------------------------------AI RESPONSE---------------------------------------
 
 void loop() {
     // Capture sensor data here
-    String inputData = "Room light: " + read_room_light() + ", Room temperature: " + read_room_temperature();
+    String inputData = "78";
     Serial.printf("Input data: %s\n", inputData.c_str());
 
     // Get AI response
@@ -145,15 +129,20 @@ void loop() {
     
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
         Serial.printf("AI Response: %s\n", result.c_str());
-        
-        if (auto func = funcRegistry.getFunctionByName(result)) {
-            Serial.print("FUNCTION");
-            Serial.println(result);
-            func();
+        StaticJsonDocument<64> doc;
+        DeserializationError error = deserializeJson(doc, result);
+        // Check if parsing was successful
+        if (error) {
+            Serial.print("JSON Parsing Failed: ");
+            Serial.println(error.f_str());
+            return;
         }
+        playHarmonizedNotes(doc[0], doc[1], doc[2]);
     } else {
         Serial.printf("AI Error: %s\n", result.c_str());
     }
     
-    delay(1000);
+    delay(5000);
+
+    readSerialAndPlayHarmonizedNotes();
 }
