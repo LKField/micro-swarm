@@ -18,14 +18,16 @@
 #include "Config.h"
 #include "arduino_secrets.h"
 
-String clientName = "Lucretia";
+String clientName = "Swarm_Reference";
 
 // To connect to the Fab Lab BCN server 
 const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
 const char* mqttUser = "fablabbcn102";
 const char* mqttPass = "";
-const char* topicToPub = "lab/lucretia/cell1";
+const char* topicToPub = "lab/swarm/cell1";
+
+char msg[50];
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -64,7 +66,7 @@ void mqttConnect() {
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 1 seconds");
+      Serial.println(" try again in 1 second");
       // Wait 1 seconds before retrying
       delay(1000);
     }
@@ -85,7 +87,7 @@ void setupWiFi() {
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(19600);
 
     // Setup network
   setupWiFi();

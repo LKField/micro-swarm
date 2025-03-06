@@ -17,14 +17,16 @@
 #include <PubSubClient.h>
 #include "Config.h"
 #include "arduino_secrets.h"
+#include "pitches.h"
 
-String clientName = "Lucretia";
+// MQTT Setup names and topics 
+String clientName = "Swarm_Cell_1";
 
 const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
 const char* mqttUser = "fablabbcn102";
 const char* mqttPass = "";
-const char* topicToSub = "lab/lucretia/cell1";
+const char* topicToSub = "lab/swarm/cell1";
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -37,6 +39,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print((char)payload[i]);
   }
   Serial.println();
+  tone(PinConfig::BUZZER, 440, 500);
 }
 
 void mqttConnect() {
@@ -77,17 +80,23 @@ void setupWiFi() {
     }
   
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
+    tone(PinConfig::BUZZER, 440, 500);
+    noTone(PinConfig::BUZZER);
 }
 
 void setup()
 {
   Serial.begin(9600);
 
-    // Setup network
+  // Setup network
   setupWiFi();
 
+  // Set up MQTT 
   mqttClient.setServer(mqttBroker, 1883);
   mqttClient.setCallback(callback);
+
+  // Set up Buzzer 
+  //pinMode(PinConfig::BUZZER, OUTPUT);
 
   // Allow the hardware to sort itself out
   delay(1500);
