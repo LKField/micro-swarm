@@ -115,6 +115,7 @@ void setupAI() {
   
   // Initialize AI controller
   aiController = new AIController(client);
+
 }
 
 // ---------------------------------------AI RESPONSE---------------------------------------
