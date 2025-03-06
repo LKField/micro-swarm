@@ -22,11 +22,15 @@
 // MQTT Setup names and topics 
 String clientName = "Swarm_Cell_1";
 
+// To connect to the Fab Lab BCN server 
 const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
 const char* mqttUser = "fablabbcn102";
 const char* mqttPass = "";
 const char* topicToSub = "lab/swarm/cell1";
+
+// Define frequency
+long frequency = 0;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
@@ -35,11 +39,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
+  frequency = 0;
   for (int i=0;i<length;i++) {
-    Serial.print((char)payload[i]);
+  //  Serial.print((char)payload[i]);
+    int digit = (char)payload[i] - '0';
+    frequency = frequency * 10 + digit;
   }
+  Serial.print(frequency);
+  tone(PinConfig::BUZZER, frequency, 500);
   Serial.println();
-  tone(PinConfig::BUZZER, 440, 500);
 }
 
 void mqttConnect() {

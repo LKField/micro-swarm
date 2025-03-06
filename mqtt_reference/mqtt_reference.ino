@@ -17,6 +17,7 @@
 #include <PubSubClient.h>
 #include "Config.h"
 #include "arduino_secrets.h"
+#include "pitches.h"
 
 String clientName = "Swarm_Reference";
 
@@ -25,12 +26,15 @@ const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
 const char* mqttUser = "fablabbcn102";
 const char* mqttPass = "";
-const char* topicToPub = "lab/swarm/cell1";
-
-char msg[50];
+const char* topicsToPub[] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
+const int topicsLength = 3;
 
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
+
+// Define frequency and message 
+char* msg[] = {"440", "587", "698"};
+long frequency = 0;
 
 // debounce parameter 
 bool touchBool = false;
@@ -39,9 +43,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
+  frequency = 0;
   for (int i=0;i<length;i++) {
-    Serial.print((char)payload[i]);
+  //  Serial.print((char)payload[i]);
+    int digit = (char)payload[i] - '0';
+    frequency = frequency * 10 + digit;
   }
+  Serial.print("Frequency: ");
+  Serial.print(frequency);
+  tone(PinConfig::BUZZER, frequency, 500);
   Serial.println();
 }
 
@@ -53,16 +63,18 @@ void mqttConnect() {
     if (mqttClient.connect(mqttClientName, mqttUser, mqttPass)) {
       Serial.println("connected");
 
-      // Subscribing
-      mqttClient.subscribe(topicToPub);
+      // Subscribing to topicsToPub[1] = "lab/swarm/cell2"
+      mqttClient.subscribe(topicsToPub[1]);
       Serial.print("subscribed to: ");
-      Serial.println(topicToPub);
+      Serial.println(topicsToPub[1]);
 
-      // Publishing 
-      mqttClient.publish(topicToPub, "hello there!");
-      Serial.print("published to: ");
-      Serial.println(topicToPub);
-
+      // Publishing to all topics in topicsToPub[]
+      for (int i=0;i<topicsLength;i++) {
+        mqttClient.publish(topicsToPub[i], "440");
+        Serial.print("published to: ");
+        Serial.println(topicsToPub[i]);
+      }
+      
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
@@ -71,6 +83,7 @@ void mqttConnect() {
       delay(1000);
     }
   }
+//  Serial.println("End of mqttConnect");
 }
 
 void setupWiFi() {
@@ -89,14 +102,20 @@ void setup()
 {
   Serial.begin(19600);
 
-    // Setup network
+  // Setup network
   setupWiFi();
 
   mqttClient.setServer(mqttBroker, 1883);
   mqttClient.setCallback(callback);
 
-  // Allow the hardware to sort itself out
+//  Allow the hardware to sort itself out
   delay(1500);
+}
+
+void sendData(char* data[]) {
+  for (int i=0;i<topicsLength;i++) {
+    mqttClient.publish(topicsToPub[i], data[i]);
+  }
 }
 
 void loop()
@@ -115,10 +134,15 @@ void loop()
   if (touch >= 100000) {
     if (!touchBool) {
       touchBool = true;
-      mqttClient.publish(topicToPub, "hello there!");
+      sendData(msg);
+      // for (int i=0;i<topicsLength;i++) {
+      //   mqttClient.publish(topicsToPub[i], msg[i]);
+      // }
     //  Serial.println(touchBool);
     }
   } else if (touchBool){
     touchBool = false;
   }
+
+//  Serial.println(notes[0]);
 }
