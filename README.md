@@ -25,22 +25,35 @@ Micro Swarm is a project for the MDEF01 2024-2025 Course to test 'swarm intellig
     │   ├── FunctionRegistry.cpp
     │   ├── FunctionRegistry.h
     │   └── pitches.h
+    ├── Input_Notes
+    │   ├── Input_Notes.ino
+    │   └── pitches.h
+    ├── Piezo_Sensor
+    │   ├── Piezo_Sensor.ino
+    │   └── pitches.h
     ├── MQTTsend - Obsolete 
     │   ├── MQTTsend.ino
     │   ├── Config.cpp
     │   └── Config.h
-	├── MQTTreceive - Obsolete
+    ├── MQTTreceive - Obsolete
     │   ├── MQTTreceive.ino
     │   ├── Config.cpp
     │   └── Config.h
-	├── mqtt_reference - Current
+    ├── mqtt_reference - Current 
     │   ├── mqtt_reference.ino
     │   ├── Config.cpp
     │   └── Config.h
-	├── mqtt_cell1 - Current
+    ├── mqtt_cell1 - Current
     │   ├── mqtt_cell1.ino
     │   ├── Config.cpp
     │   └── Config.h
+    ├── mqtt_ref_call - Current (MQTT Reference as Class )
+    │   ├── mqtt_ref_call.ino
+    │   ├── mqtt_reference.cpp
+    │   ├── mqtt_reference.h
+    │   ├── Config.cpp
+    │   ├── Config.h
+    │   └── pitches.h
     └── README.md
 ```
 ## Fabrication Process 
@@ -68,7 +81,7 @@ The code for the cells are much simpler. Each Cell subscribes to a topic and the
 
 
 
-## References 
+## Reference Projects/Inspiration 
 
 
 
@@ -78,7 +91,7 @@ From the beginning we were interested in exploring different inputs to the syste
 
 ##  License
 
-This project is protected under the [SELECT-A-LICENSE](https://choosealicense.com/licenses) License. For more details, refer to the [LICENSE](https://choosealicense.com/licenses/) file.
+This project is protected under the [MIT LICENSE](https://en.wikipedia.org/wiki/MIT_License) License. For more details, refer to the [LICENSE](/LICENSE) file.
 
 ---
 
