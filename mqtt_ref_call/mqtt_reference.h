@@ -3,6 +3,7 @@
 
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 #include "Config.h"
 #include "arduino_secrets.h"
 #include "pitches.h"
@@ -11,7 +12,14 @@
 class MQTTWrapper {
   public:
     // Constructor to initialize the MQTT client with necessary parameters
+  //  MQTTWrapper(WiFiClientSecure& wifiClient);
     MQTTWrapper(WiFiClient& wifiClient);
+
+    
+    // These methods should be public to be called from main sketch
+    void setupMQTT();
+    void loopMQTT();
+    void sendData(char* data[]);
 
   private:
     // MQTT Client configuration
@@ -27,20 +35,12 @@ class MQTTWrapper {
     // Internal state variables
     long frequency;
 
-    const char** topicsToPub;
-
+    // MQTT topics 
+    const char* topicsToPub[3];
 
     // Helper functions for MQTT
-    void setupMQTT();
-    void loopMQTT();
     void mqttConnect();
     void callback(char* topic, byte* payload, unsigned int length);
-    void sendData(char* data[]);
-
-
-    // Message to be sent
-//    char* msg[3] = {"440", "587", "698"};
 };
 
 #endif
-

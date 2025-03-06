@@ -13,25 +13,27 @@
  
 */
 
-// #include "mqtt_reference.h"
+#include "mqtt_reference.h"
 #include "Config.h"
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
+//#include <WiFiClientSecure.h>
 
 char* msg[] = {"698", "587", "440"};
 bool touchBool;
 
-WiFiClientSecure WIFIclient;
+//WiFiClientSecure client;
+WiFiClient client;
+MQTTWrapper* mqtt_wrapper;
 
 void setupWiFi() {
-    WiFi.mode(WIFI_STA);
-    Serial.printf("Connecting to %s\n", WiFiConfig::SSID);
-    WiFi.begin(WiFiConfig::SSID, WiFiConfig::PASSWORD);
-    
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(500);
-    }
+  WiFi.mode(WIFI_STA);
+  Serial.printf("Connecting to %s\n", WiFiConfig::SSID);
+  WiFi.begin(WiFiConfig::SSID, WiFiConfig::PASSWORD);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+      Serial.print(".");
+      delay(500);
+  }
 
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
@@ -39,18 +41,20 @@ void setupWiFi() {
 void setup() {
   Serial.begin(19200);
   setupWiFi();
-  // setupMQTT();
+  delay(1000);
+  mqtt_wrapper = new MQTTWrapper(client);
+  mqtt_wrapper->setupMQTT();
 }
 
 void loop() {
-  // loopMQTT();
+  mqtt_wrapper->loopMQTT();
   //  int touch = touchRead(PinConfig::TOUCH_SENSOR_1);
   int touch = touchRead(4);
 
   if (touch >= 100000) {
     if (!touchBool) {
       touchBool = true;
-      // sendData(msg);
+      mqtt_wrapper->sendData(msg);
     }
   } else if (touchBool) {
     touchBool = false;

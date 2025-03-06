@@ -1,6 +1,7 @@
 #include "mqtt_reference.h"
 
 // Constructor to initialize the MQTT Client with parameters
+//MQTTWrapper::MQTTWrapper(WiFiClientSecure& wifiClient)
 MQTTWrapper::MQTTWrapper(WiFiClient& wifiClient)
   : mqttClient(wifiClient) {
 
@@ -11,8 +12,10 @@ MQTTWrapper::MQTTWrapper(WiFiClient& wifiClient)
   this->topicsLength = 3;
   this->frequency = 0;
 
-  this->topicsToPub[topicsLength] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
-
+  // Correctly initialize the array of string literals
+  this->topicsToPub[0] = "lab/swarm/cell1";
+  this->topicsToPub[1] = "lab/swarm/cell2";
+  this->topicsToPub[2] = "lab/swarm/cell3";
 }
 
 // Callback function for MQTT message handling
@@ -44,9 +47,11 @@ void MQTTWrapper::mqttConnect() {
     Serial.print("Attempting MQTT connection...");
     if (mqttClient.connect(mqttClientName, mqttUser, mqttPass)) {
       Serial.println("connected");
+      // Subscribe to topicsToPub[1] = "lab/swarm/cell2"
       mqttClient.subscribe(topicsToPub[1]);
       Serial.print("subscribed to: ");
       Serial.println(topicsToPub[1]);
+      // Publish to all topicsToPub
       for (int i = 0; i < topicsLength; i++) {
         mqttClient.publish(topicsToPub[i], "440");
         Serial.print("published to: ");
@@ -55,8 +60,8 @@ void MQTTWrapper::mqttConnect() {
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
-      Serial.println(" try again in 1 second");
-      delay(1000);
+      Serial.println(" try again in 5 seconds");
+      delay(5000);
     }
   }
 }
