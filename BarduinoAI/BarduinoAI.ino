@@ -115,20 +115,36 @@ void mqttSendData(char* data[]) {
 }
 
 // ---------------------------------------MUSICAL FUNCTIONS---------------------------------------
+// void sendHarmonizedNotes(int data1, int data2, int data3) {
+// //  char* data[3];
+//   Serial.println(data1);
+//   Serial.println(data2);
+//   Serial.println(data3);
+//   char* notesForPub[3] = {0, 0, 0};
+//   notesForPub[0] = notes[data1 - 1];
+//   notesForPub[1] = notes[data2 - 1];
+//   notesForPub[2] = notes[data3 - 1];
 
-void sendHarmonizedNotes(int data1, int data2, int data3) {
+//   Serial.print("notesForPub[0]: ");
+//   Serial.println(notesForPub[0]);
+//   mqttSendData(notesForPub);
+//  return notesForPub;
+//}
+char** sendHarmonizedNotes(int data1, int data2, int data3) {
 //  char* data[3];
   Serial.println(data1);
   Serial.println(data2);
   Serial.println(data3);
-  char* notesForPub[3];
+  char* notesForPub[3] = {0, 0, 0};
   notesForPub[0] = notes[data1 - 1];
   notesForPub[1] = notes[data2 - 1];
   notesForPub[2] = notes[data3 - 1];
 
   Serial.print("notesForPub[0]: ");
   Serial.println(notesForPub[0]);
-  mqttSendData(notesForPub);
+//  mqttSendData(notesForPub);
+
+  return notesForPub;
 }
 // void sendHarmonizedNotes(int data[]) {
 // //  char* data[3];
@@ -260,6 +276,9 @@ void setup() {
 // ---------------------------------------MAIN LOOP---------------------------------------
 
 void loop() {
+  bool notes_flag = false;
+  char** notes[3];
+  //int doc[3] = {0,0,0};
   inputData = read_vibration();
   // Capture sensor data here
   //String inputData = "78";
@@ -281,8 +300,11 @@ void loop() {
         return;
       }
     //  playHarmonizedNotes(doc[0], doc[1], doc[2]);
-      sendHarmonizedNotes(doc[0], doc[1], doc[2]);
+      notes[] = sendHarmonizedNotes(doc[0], doc[1], doc[2]);
+
+    //  sendHarmonizedNotes(doc[0], doc[1], doc[2]);
     //  sendHarmonizedNotes(doc);
+      notes_flag = true;
     } else {
       Serial.printf("AI Error: %s\n", result.c_str());
     }
@@ -290,10 +312,14 @@ void loop() {
     if (!mqttClient.connected()) {
       mqttConnect();
     }
+    if (notes_flag) {
+      notes_flag = false;
+      mqttSendData(notes);
+    }
+    
     mqttClient.loop();
-      
-  //  delay(1000);
-
+    
 //  readSerialAndPlayHarmonizedNotes();
   }
+  delay(1000);
 }

@@ -61,10 +61,10 @@ void mqttConnect() {
     if (mqttClient.connect(mqttClientName, MQTTConfig::MQTT_USER, MQTTConfig::MQTT_PASS)) {
       Serial.println("connected");
 
-      // Subscribing to topicsToPub[1] = "lab/swarm/cell2"
-      mqttClient.subscribe(topicsToPub[1]);
+      // Subscribing to topicsToPub[2] = "lab/swarm/cell3"
+      mqttClient.subscribe(topicsToPub[2]);
       Serial.print("subscribed to: ");
-      Serial.println(topicsToPub[1]);
+      Serial.println(topicsToPub[2]);
 
       // Publishing to all topics in topicsToPub[]
       for (int i=0;i<topicsLength;i++) {
@@ -139,8 +139,7 @@ void loop()
       //   mqttClient.publish(topicsToPub[i], msg[i]);
       }
     //  Serial.println(touchBool);
-    }
-  } else if (touchBool){
+    } else if (touchBool){
     touchBool = false;
   }
 
