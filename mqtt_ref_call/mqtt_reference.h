@@ -1,7 +1,7 @@
 #ifndef MQTT_REFERENCE_H
 #define MQTT_REFERENCE_H
 
-//#include <WiFi.h>
+#include <WiFi.h>
 #include <PubSubClient.h>
 #include <WiFiClientSecure.h>
 #include "Config.h"
@@ -12,8 +12,8 @@
 class MQTTWrapper {
   public:
     // Constructor to initialize the MQTT client with necessary parameters
-  //  MQTTWrapper(WiFiClientSecure& wifiClient);
-    MQTTWrapper(WiFiClient& wifiClient);
+    MQTTWrapper(WiFiClientSecure& wifiClient);
+  //  MQTTWrapper(WiFiClient& wifiClient);
 
     
     // These methods should be public to be called from main sketch
