@@ -21,8 +21,8 @@
 char* msg[] = {"698", "587", "440"};
 bool touchBool;
 
-WiFiClientSecure client;
-//WiFiClient client;
+//WiFiClientSecure client;
+WiFiClient client;
 MQTTWrapper* mqtt_wrapper;
 
 void setupWiFi() {
@@ -41,7 +41,7 @@ void setupWiFi() {
 void setup() {
   Serial.begin(19200);
   setupWiFi();
-  client.setInsecure();
+//  client.setInsecure();
   delay(1000);
   mqtt_wrapper = new MQTTWrapper(client);
   mqtt_wrapper->setupMQTT();

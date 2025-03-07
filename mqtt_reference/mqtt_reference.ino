@@ -14,7 +14,7 @@
 */
 
 #include <WiFi.h>
-//#include <WiFiClientSecure.h>
+#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include "Config.h"
 #include "arduino_secrets.h"
@@ -26,8 +26,8 @@ const char* mqttClientName = clientName.c_str();
 const char* topicsToPub[] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
 const int topicsLength = 3;
 
-WiFiClient wifiClient;
-//WiFiClientSecure wifiClient;
+//WiFiClient wifiClient;
+WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 // Define frequency and message 
@@ -102,6 +102,8 @@ void setup()
 
   // Setup network
   setupWiFi();
+  wifiClient.setInsecure();
+
 
   mqttClient.setServer(MQTTConfig::MQTT_BROKER, MQTTConfig::MQTT_PORT);
   mqttClient.setCallback(callback);
