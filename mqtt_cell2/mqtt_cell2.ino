@@ -21,21 +21,16 @@
 #include "pitches.h"
 
 // MQTT Setup names and topics 
-String clientName = "Swarm_Reference";
+String clientName = "Swarm_Cell_2";
 const char* mqttClientName = clientName.c_str();
-const char* topicsToPub[] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
-const int topicsLength = 3;
+const char* topicToSub = "lab/swarm/cell2";
+
+// Define frequency
+long frequency = 0;
 
 //WiFiClient wifiClient;
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
-
-// Define frequency and message 
-char* msg[] = {"440", "587", "698"};
-long frequency = 0;
-
-// debounce parameter 
-bool touchBool = false;
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
@@ -47,7 +42,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     int digit = (char)payload[i] - '0';
     frequency = frequency * 10 + digit;
   }
-  Serial.print("Frequency: ");
   Serial.print(frequency);
   tone(PinConfig::BUZZER, frequency, 500);
   Serial.println();
@@ -61,18 +55,16 @@ void mqttConnect() {
     if (mqttClient.connect(mqttClientName, MQTTConfig::MQTT_USER, MQTTConfig::MQTT_PASS)) {
       Serial.println("connected");
 
-      // Subscribing to topicsToPub[1] = "lab/swarm/cell2"
-      mqttClient.subscribe(topicsToPub[1]);
+      // Subscribing
+      mqttClient.subscribe(topicToSub);
       Serial.print("subscribed to: ");
-      Serial.println(topicsToPub[1]);
+      Serial.println(topicToSub);
 
-      // Publishing to all topics in topicsToPub[]
-      for (int i=0;i<topicsLength;i++) {
-        mqttClient.publish(topicsToPub[i], "440");
-        Serial.print("published to: ");
-        Serial.println(topicsToPub[i]);
-      }
-      
+      // Publishing 
+      // mqttClient.publish(topicToPub, "hello there!");
+      // Serial.print("published to: ");
+      // Serial.println(topicToPub);
+
     } else {
       Serial.print("failed, rc=");
       Serial.print(mqttClient.state());
@@ -81,7 +73,6 @@ void mqttConnect() {
       delay(1000);
     }
   }
-//  Serial.println("End of mqttConnect");
 }
 
 void setupWiFi() {
@@ -94,28 +85,27 @@ void setupWiFi() {
     }
   
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
+    tone(PinConfig::BUZZER, 440, 500);
+    noTone(PinConfig::BUZZER);
 }
 
 void setup()
 {
-  Serial.begin(19600);
+  Serial.begin(9600);
 
   // Setup network
   setupWiFi();
   wifiClient.setInsecure();
 
-
+  // Set up MQTT 
   mqttClient.setServer(MQTTConfig::MQTT_BROKER, MQTTConfig::MQTT_PORT);
   mqttClient.setCallback(callback);
 
-//  Allow the hardware to sort itself out
-  delay(1500);
-}
+  // Set up Buzzer 
+  //pinMode(PinConfig::BUZZER, OUTPUT);
 
-void sendData(char* data[]) {
-  for (int i=0;i<topicsLength;i++) {
-    mqttClient.publish(topicsToPub[i], data[i]);
-  }
+  // Allow the hardware to sort itself out
+  delay(1500);
 }
 
 void loop()
@@ -123,26 +113,5 @@ void loop()
   if (!mqttClient.connected()) {
     mqttConnect();
   }
-
   mqttClient.loop();
-
-  int touch = touchRead(PinConfig::TOUCH_SENSOR_1);
-
-  //Serial.println(touch);
-
-  // debounce 
-  if (touch >= 100000) {
-    if (!touchBool) {
-      touchBool = true;
-      sendData(msg);
-      // for (int i=0;i<topicsLength;i++) {
-      //   mqttClient.publish(topicsToPub[i], msg[i]);
-      }
-    //  Serial.println(touchBool);
-    }
-  } else if (touchBool){
-    touchBool = false;
-  }
-
-//  Serial.println(notes[0]);
 }

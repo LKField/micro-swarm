@@ -31,3 +31,10 @@ const int PinConfig::BUZZER = 46;           // Changed to buzzer pin 46 not 43
 const int PinConfig::TEMP_SENSOR_SDA = 8;
 const int PinConfig::TEMP_SENSOR_SCL = 9;
 const int PinConfig::NEOPIXEL = 38;
+const int PinConfig::VIBRATION = 4;
+
+// To connect to the Fab Lab BCN server 
+const char* MQTTConfig::MQTT_BROKER = SECRET_MQTT_BROKER;
+const int MQTTConfig::MQTT_PORT = SECRET_MQTT_PORT;
+const char* MQTTConfig::MQTT_USER = SECRET_MQTT_USER;
+const char* MQTTConfig::MQTT_PASS = SECRET_MQTT_PASS;
