@@ -77,21 +77,33 @@ The code for the cells are much simpler. Each Cell subscribes to a topic and the
 
 ### The Carapace 
 
+The carapace, with an insect look, besides being designed to be adpatable in its internal parts when assembling the electronic components to improve time, for mother and son, it was intentionally designed to reverbarate the acoustic from one chamber to the other and amplify the sound emited by the buzzer inside of the artificial insect. The structure of the arctifact is divided in two specific parts, a flexible silicone base with four legs that can be attached to different places vertically and horizontally with sucktion cups on each leg, and an external strcuture that covers the Barduino board, battery and piezo sensor, 3D printed in PLA to protect the componentes from the external interference and maximize the sound by using oval shapes and seven holes on top to let the air flow from the chamber to the outside. 
+
+To produce, the carapace was used a a Bamboo 3D printer for the shell, a Creality Ender to print the molld for the silicone bottom layer, and Blender and Adobe Illustrator the to define the shapes and forms. It's important to enhance the several changes made during the project that trasnformed the original shaped to a new version considering the possibilities of batteries to be used on the Barduino and they would be distribute insied of the carapace withou interfering each other, what consequently gave a more anaphormical shape specifically designed to the board and components for this Micro Challenge.
 
 
 ### Iteration Process 
+
+Flavio schematics
 
 
 ---
 
 ## Reference Projects/Inspiration 
 
+Cigars, Birds, 
+
 
 ---
 
 ## Future Project Developments 
 
-From the beginning we were interested in exploring different inputs to the system, for a future iteration of the project, we think it would be very cool to have the potential for the input to come from a MIDI controller where a human could provide a note or series of notes for the 'cicadas' to harmonize with. Instead of mimicking a danger sense in animals in nature, this functionality could allow the human and the 'insects' to work together to create a musical atmosphere. 
+Lucretia: From the beginning we were interested in exploring different inputs to the system, for a future iteration of the project, we think it would be very cool to have the potential for the input to come from a MIDI controller where a human could provide a note or series of notes for the 'cicadas' to harmonize with. Instead of mimicking a danger sense in animals in nature, this functionality could allow the human and the 'insects' to work together to create a musical atmosphere.
+
+Carlos: Considering the logical nature of the communication between different individuals in a swarm, this project could truly be used to aware an sense enviromental issues, as something camouflaged in nature giving signs to humans and other animals. One of the possibilities that I would like to explore is trying to mimick the frequencies of specific livings beings to communicate and create an artifical-biological relation to trigger actions, this would have a truly potentional to enviromental measurament and care and coube be used in different biomes with easy adaptabillity. In addition, this could would provied a glimpse of the possibilities to communicate different individuals with one reference of control, something that could truly be applied to my research in biohybrid robots, and at lastm, it would be delighful to improve and give AI autonomy to each one of the robots.
+
+Flavio:
+
 
 ---
 
