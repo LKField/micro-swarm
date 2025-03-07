@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <PubSubClient.h>
 #include "Config.h"
 #include "FunctionRegistry.h"
 #include "AIController.h"
@@ -9,12 +10,13 @@
 
 // Global objects
 WiFiClientSecure client;
+PubSubClient mqttClient(client);
 FunctionRegistry funcRegistry;
 AIController* aiController;
 TI_TMP102 temperature;
 
-const int buzzerPin = 46;  // Change if needed for Arduino
-const int piezoPin = 4; // The piezo sensor pin (change if needed)
+//const int buzzerPin = 46;  // Change if needed for Arduino
+//const int piezoPin = 4; // The piezo sensor pin (change if needed)
 
 // ---------------------------------------MUSICAL NOTES---------------------------------------
 
@@ -37,96 +39,190 @@ int limitedReading = 0;
 String inputData;
 bool isvibrating = false;
 
+// MQTT Setup names and topics 
+String clientName = "Swarm_Reference";
+const char* mqttClientName = clientName.c_str();
+const char* topicsToPub[] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
+const int topicsLength = 3;
 
-void setup() {
-  Wire.begin();
-  Serial.begin(115200);
+// Define frequency and message 
+char* msg[] = {"440", "587", "698"};
+long frequency = 0;
+
+// debounce parameter 
+bool touchBool = false;
+
+// char getFrequency(int note1, int note2, int note3) {
+//   // for (int i=0;i<length;i++) {
+//   //        
+//   // 
+//   // }
+//   if (note1 >= 1 && note1 <= numNotes && note2 >= 1 && note2 <= numNotes && note3 >= 1 && note3 <= numNotes) {
+//     msg[0] = char(notes[note1 - 1]);
+//     msg[1] = char(notes[note2 - 1]);
+//     msg[2] = char(notes[note3 - 1]);
+//     Serial.println(msg);
+//     return " ";
+//   } else {
+//     Serial.println("Invalid notes received");
+    
+//     return "";
+//   }
+// }
+
+// void playHarmonizedNotes(int note1, int note2, int note3) {
+//     if (note1 >= 1 && note1 <= numNotes && note2 >= 1 && note2 <= numNotes && note3 >= 1 && note3 <= numNotes) {
+//         int frequency1 = notes[note1 - 1];
+//         int frequency2 = notes[note2 - 1];
+//         int frequency3 = notes[note3 - 1];
+
+//         tone(buzzerPin, frequency1, 500);
+//         delay(600);
+//         tone(buzzerPin, frequency2, 500);
+//         delay(600);
+//         tone(buzzerPin, frequency3, 500);
+//         delay(600);
+//     } else {
+//         Serial.println("Invalid notes received");
+//     }
+// }
+
+// void readSerialAndPlayHarmonizedNotes() {
+//     if (Serial.available()) {
+//         String input = Serial.readStringUntil('\n');
+//         input.trim();  // Remove any leading or trailing whitespace
+
+//         if (input.startsWith("[") && input.endsWith("]")) {
+//             input.remove(0, 1);  // Remove the leading '['
+//             input.remove(input.length() - 1, 1);  // Remove the trailing ']'
+//             input.replace(" ", "");  // Remove any remaining spaces
+
+//             int commaIndex1 = input.indexOf(',');
+//             int commaIndex2 = input.indexOf(',', commaIndex1 + 1);
+
+//             if (commaIndex1 != -1 && commaIndex2 != -1) {
+//                 int note1 = input.substring(0, commaIndex1).toInt();
+//                 int note2 = input.substring(commaIndex1 + 1, commaIndex2).toInt();
+//                 int note3 = input.substring(commaIndex2 + 1).toInt();
+
+//                 playHarmonizedNotes(note1, note2, note3);
+//             } else {
+//                 Serial.println("Invalid input format");
+//             }
+//         } else {
+//             Serial.println("Invalid input format");
+//         }
       
-  // Setup network
-  setupWiFi();
-  client.setInsecure();
-  
-  pinMode(buzzerPin, OUTPUT);
-  pinMode(piezoPin, INPUT);
-
-  Serial.println("Piezo vibration to note demo");
-
-  // Initialize AI controller
-  aiController = new AIController(client);
+//     }
+// }
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  frequency = 0;
+  for (int i=0;i<length;i++) {
+  //  Serial.print((char)payload[i]);
+    int digit = (char)payload[i] - '0';
+    frequency = frequency * 10 + digit;
+  }
+  Serial.print("Frequency: ");
+  Serial.print(frequency);
+  tone(PinConfig::BUZZER, frequency, 500);
+  Serial.println();
 }
 
-void playHarmonizedNotes(int note1, int note2, int note3) {
-    if (note1 >= 1 && note1 <= numNotes && note2 >= 1 && note2 <= numNotes && note3 >= 1 && note3 <= numNotes) {
-        int frequency1 = notes[note1 - 1];
-        int frequency2 = notes[note2 - 1];
-        int frequency3 = notes[note3 - 1];
+void mqttConnect() {
+  // Loop until we're reconnected
+  while (!mqttClient.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    if (mqttClient.connect(mqttClientName, MQTTConfig::MQTT_USER, MQTTConfig::MQTT_PASS)) {
+      Serial.println("connected");
 
-        tone(buzzerPin, frequency1, 500);
-        delay(600);
-        tone(buzzerPin, frequency2, 500);
-        delay(600);
-        tone(buzzerPin, frequency3, 500);
-        delay(600);
+      // Subscribing to topicsToPub[1] = "lab/swarm/cell2"
+      mqttClient.subscribe(topicsToPub[1]);
+      Serial.print("subscribed to: ");
+      Serial.println(topicsToPub[1]);
+
+      // Publishing to all topics in topicsToPub[]
+      for (int i=0;i<topicsLength;i++) {
+        mqttClient.publish(topicsToPub[i], "440");
+        Serial.print("published to: ");
+        Serial.println(topicsToPub[i]);
+      }
+      
     } else {
-        Serial.println("Invalid notes received");
+      Serial.print("failed, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println(" try again in 1 second");
+      // Wait 1 seconds before retrying
+      delay(1000);
     }
-}
-
-void readSerialAndPlayHarmonizedNotes() {
-    if (Serial.available()) {
-        String input = Serial.readStringUntil('\n');
-        input.trim();  // Remove any leading or trailing whitespace
-
-        if (input.startsWith("[") && input.endsWith("]")) {
-            input.remove(0, 1);  // Remove the leading '['
-            input.remove(input.length() - 1, 1);  // Remove the trailing ']'
-            input.replace(" ", "");  // Remove any remaining spaces
-
-            int commaIndex1 = input.indexOf(',');
-            int commaIndex2 = input.indexOf(',', commaIndex1 + 1);
-
-            if (commaIndex1 != -1 && commaIndex2 != -1) {
-                int note1 = input.substring(0, commaIndex1).toInt();
-                int note2 = input.substring(commaIndex1 + 1, commaIndex2).toInt();
-                int note3 = input.substring(commaIndex2 + 1).toInt();
-
-                playHarmonizedNotes(note1, note2, note3);
-            } else {
-                Serial.println("Invalid input format");
-            }
-        } else {
-            Serial.println("Invalid input format");
-        }
-      
-    }
-}
-
-
-void read_vibration() {
-  // Average 10 readings for filtering noise
-  int sum = 0;
-  for (int i = 0; i < 10; i++) {
-    sum += analogRead(piezoPin);
-    delay(10);  // Short delay between samples for smoother reading
   }
-  vibrationReading = sum / 10;  // Average of 10 readings
-
-  Serial.println(vibrationReading);
-
-  // Limit vibration reading to a range of 0-1023
-  limitedReading = map(vibrationReading, 0, 1023, 0, numNotes - 1);
-
-  // Play the corresponding note based on vibration
-  if (vibrationReading > 200) {  // Threshold to avoid too low vibrations triggering notes
-    inputData = String(limitedReading);
-    isvibrating = true; 
-    Serial.println("isvibrating ");
-    //Serial.println(inputData);
-    Serial.println(limitedReading);
-
-  }
-  delay(100);  // Short delay before next reading
+//  Serial.println("End of mqttConnect");
 }
+
+void sendData(char* data[]) {
+  for (int i=0;i<topicsLength;i++) {
+    mqttClient.publish(topicsToPub[i], data[i]);
+  }
+}
+
+
+// void read_vibration() {
+//   // Average 10 readings for filtering noise
+//   int sum = 0;
+//   for (int i = 0; i < 10; i++) {
+//     sum += analogRead(PinConfig::VIBRATION);
+//     delay(10);  // Short delay between samples for smoother reading
+//   }
+//   vibrationReading = sum / 10;  // Average of 10 readings
+
+//   Serial.println(vibrationReading);
+
+//   // Limit vibration reading to a range of 0-1023
+//   limitedReading = map(vibrationReading, 0, 1023, 0, numNotes - 1);
+
+//   // Play the corresponding note based on vibration
+//   if (vibrationReading > 200) {  // Threshold to avoid too low vibrations triggering notes
+//     inputData = String(limitedReading);
+//     isvibrating = true; 
+//     Serial.println("isvibrating ");
+//     //Serial.println(inputData);
+//     Serial.println(limitedReading);
+
+//   }
+//   delay(100);  // Short delay before next reading
+// }
+
+void getAiResponse(String inputData) {
+  // Get AI response
+  String result;
+
+  if (aiController->processNotes(inputData, result)) {
+    Serial.printf("AI Response: %s\n", result.c_str());
+  } else {
+    Serial.printf("AI Error: %s\n", result.c_str());
+  }
+}
+//   if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
+//     Serial.printf("AI Response: %s\n", result.c_str());
+//     StaticJsonDocument<64> doc;
+//     DeserializationError error = deserializeJson(doc, result);
+
+//     //  Check if parsing was successful
+//     if (error) {
+//         Serial.print("JSON Parsing Failed: ");
+//         Serial.println(error.f_str());
+//         return;
+//     }
+
+//   } else {
+//       Serial.printf("AI Error: %s\n", result.c_str());
+//   }
+// }
+
+
 // ---------------------------------------SETUP WIFI---------------------------------------
 
 void setupWiFi() {
@@ -142,51 +238,86 @@ void setupWiFi() {
     Serial.printf("\nConnected! IP: %s\n", WiFi.localIP().toString().c_str());
 }
 
-// ---------------------------------------SETUP AI---------------------------------------
+// ---------------------------------------SETUP ---------------------------------------
 
-void setupAI() {
+void setup() {
   Wire.begin();
   Serial.begin(115200);
       
   // Setup network
   setupWiFi();
   client.setInsecure();
+
   
+//  pinMode(buzzerPin, OUTPUT);
+//  pinMode(piezoPin, INPUT);
+
+  // Setup MQTT 
+  mqttClient.setServer(MQTTConfig::MQTT_BROKER, MQTTConfig::MQTT_PORT);
+  mqttClient.setCallback(callback);
+
+  Serial.println("Piezo vibration to note demo");
+
   // Initialize AI controller
   aiController = new AIController(client);
-
 }
 
 // ---------------------------------------AI RESPONSE---------------------------------------
 
 void loop() {
-    read_vibration();
+  //  read_vibration();
+
+    if (!mqttClient.connected()) {
+      mqttConnect();
+    }
+
+    mqttClient.loop();
+
+    int touch = touchRead(PinConfig::TOUCH_SENSOR_1);
+
     // Capture sensor data here
     //String inputData = "78";
     //Serial.printf("Input data: %s\n", inputData.c_str());
 
-    // Get AI response
-    String result;
-
-  if(isvibrating){
-    isvibrating = false;
-    if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
-        Serial.printf("AI Response: %s\n", result.c_str());
-        StaticJsonDocument<64> doc;
-        DeserializationError error = deserializeJson(doc, result);
-        // Check if parsing was successful
-        if (error) {
-            Serial.print("JSON Parsing Failed: ");
-            Serial.println(error.f_str());
-            return;
-        }
-        playHarmonizedNotes(doc[0], doc[1], doc[2]);
-    } else {
-        Serial.printf("AI Error: %s\n", result.c_str());
+  // debounce 
+  if (touch >= 100000) {
+    if (!touchBool) {
+      touchBool = true;
+      int note_index = map(touch, 100000, 500000, 0, numNotes - 1);
+      String note_str = String(note_index);
+      getAiResponse(note_str);
+      
+    } else if (touchBool){
+      touchBool = false;
     }
-   }
-    
-    delay(1000);
+  }
+  delay(1000);
 
-    readSerialAndPlayHarmonizedNotes();
 }
+//   if(isvibrating){
+//     isvibrating = false;
+//     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
+//         Serial.printf("AI Response: %s\n", result.c_str());
+// //        Serial.println(result);
+
+//        StaticJsonDocument<64> doc;
+//        DeserializationError error = deserializeJson(doc, result);
+
+//       //  Check if parsing was successful
+//         if (error) {
+//             Serial.print("JSON Parsing Failed: ");
+//             Serial.println(error.f_str());
+//             return;
+//         }
+// //        Serial.println(doc);
+// //        playHarmonizedNotes(doc[0], doc[1], doc[2]);
+// //          getFrequency(doc[0], doc[1], doc[2]);
+// //          sendData(doc);
+//     } else {
+//         Serial.printf("AI Error: %s\n", result.c_str());
+//     }
+//    }
+    
+
+
+//    readSerialAndPlayHarmonizedNotes();

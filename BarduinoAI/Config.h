@@ -26,6 +26,16 @@ struct PinConfig {
     static const int TEMP_SENSOR_SDA;
     static const int TEMP_SENSOR_SCL;
     static const int NEOPIXEL;
+  //  static const int VIBRATION;
+    static const int TOUCH_SENSOR_1;
+};
+
+// MQTT Configuration
+struct MQTTConfig {
+  static const char* MQTT_BROKER;
+  static const int MQTT_PORT;
+  static const char* MQTT_USER;
+  static const char* MQTT_PASS;
 };
 
 #endif

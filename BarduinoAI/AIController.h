@@ -12,6 +12,8 @@ class AIController {
       AIController(WiFiClientSecure& client);
       bool processImage(const char* base64Image, const String& availableActions, String& result);
       bool processTextData(const String& inputData, const String& availableActions, String& result);
+      bool processNotes(const String& inputData, String& result);
+
 
   private:
       ChatGPT<WiFiClientSecure> chatGPT;
