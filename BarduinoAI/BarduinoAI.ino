@@ -102,7 +102,7 @@ void readSerialAndPlayHarmonizedNotes() {
 }
 
 
-void read_vibration() {
+String read_vibration() {
   // Average 10 readings for filtering noise
   int sum = 0;
   for (int i = 0; i < 10; i++) {
@@ -126,6 +126,7 @@ void read_vibration() {
 
   }
   delay(100);  // Short delay before next reading
+  return inputData;
 }
 // ---------------------------------------SETUP WIFI---------------------------------------
 
@@ -160,33 +161,33 @@ void setupAI() {
 // ---------------------------------------AI RESPONSE---------------------------------------
 
 void loop() {
-    read_vibration();
-    // Capture sensor data here
-    //String inputData = "78";
-    //Serial.printf("Input data: %s\n", inputData.c_str());
+  inputData = read_vibration();
+  // Capture sensor data here
+  //String inputData = "78";
+  //Serial.printf("Input data: %s\n", inputData.c_str());
 
-    // Get AI response
-    String result;
+  // Get AI response
+  String result;
 
   if(isvibrating){
     isvibrating = false;
     if (aiController->processTextData(inputData, funcRegistry.getBulletList(), result)) {
-        Serial.printf("AI Response: %s\n", result.c_str());
-        StaticJsonDocument<64> doc;
-        DeserializationError error = deserializeJson(doc, result);
-        // Check if parsing was successful
-        if (error) {
-            Serial.print("JSON Parsing Failed: ");
-            Serial.println(error.f_str());
-            return;
-        }
-        playHarmonizedNotes(doc[0], doc[1], doc[2]);
-    } else {
-        Serial.printf("AI Error: %s\n", result.c_str());
+      Serial.printf("AI Response: %s\n", result.c_str());
+      StaticJsonDocument<64> doc;
+      DeserializationError error = deserializeJson(doc, result);
+      // Check if parsing was successful
+      if (error) {
+        Serial.print("JSON Parsing Failed: ");
+        Serial.println(error.f_str());
+        return;
+      }
+      playHarmonizedNotes(doc[0], doc[1], doc[2]);
+  } else {
+      Serial.printf("AI Error: %s\n", result.c_str());
     }
-   }
+  }
     
-    delay(1000);
+  delay(1000);
 
-    readSerialAndPlayHarmonizedNotes();
+  readSerialAndPlayHarmonizedNotes();
 }
