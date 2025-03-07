@@ -15,4 +15,12 @@ struct PinConfig {
     static const int NEOPIXEL;
 };
 
+// MQTT Configuration
+struct MQTTConfig {
+  static const char* MQTT_BROKER;
+  static const int MQTT_PORT;
+  static const char* MQTT_USER;
+  static const char* MQTT_PASS;
+};
+
 #endif

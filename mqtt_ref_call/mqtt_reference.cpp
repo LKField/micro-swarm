@@ -6,10 +6,11 @@ MQTTWrapper::MQTTWrapper(WiFiClientSecure& wifiClient)
   : mqttClient(wifiClient) {
 
   String clientName = "Swarm_Reference";
-  this->mqttBroker = "mqtt-staging.smartcitizen.me";
+  this->mqttBroker = MQTTConfig::MQTT_BROKER;
   this->mqttClientName = clientName.c_str();
-  this->mqttUser = "fablabbcn102";
-  this->mqttPass = "";
+  this->mqttPort = MQTTConfig::MQTT_PORT;
+  this->mqttUser = MQTTConfig::MQTT_USER;
+  this->mqttPass = MQTTConfig::MQTT_PASS;
   this->topicsLength = 3;
   this->frequency = 0;
 
@@ -37,7 +38,7 @@ void MQTTWrapper::callback(char* topic, byte* payload, unsigned int length) {
 
 // Setup MQTT connection
 void MQTTWrapper::setupMQTT() {
-  mqttClient.setServer(this->mqttBroker, 1883);
+  mqttClient.setServer(this->mqttBroker, this->mqttPort);
   mqttClient.setCallback([this](char* topic, byte* payload, unsigned int length) { this->callback(topic, payload, length); });
   delay(1500);  // Allow the hardware to sort itself out
 }

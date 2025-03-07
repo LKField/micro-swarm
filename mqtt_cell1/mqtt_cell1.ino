@@ -21,12 +21,7 @@
 
 // MQTT Setup names and topics 
 String clientName = "Swarm_Cell_1";
-
-// To connect to the Fab Lab BCN server 
-const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
-const char* mqttUser = "fablabbcn102";
-const char* mqttPass = "";
 const char* topicToSub = "lab/swarm/cell1";
 
 // Define frequency
@@ -55,7 +50,7 @@ void mqttConnect() {
   while (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (mqttClient.connect(mqttClientName, mqttUser, mqttPass)) {
+    if (mqttClient.connect(mqttClientName, MQTTConfig::MQTT_USER, MQTTConfig::MQTT_PASS)) {
       Serial.println("connected");
 
       // Subscribing
@@ -100,7 +95,7 @@ void setup()
   setupWiFi();
 
   // Set up MQTT 
-  mqttClient.setServer(mqttBroker, 1883);
+  mqttClient.setServer(MQTTConfig::MQTT_BROKER, MQTTConfig::MQTT_PORT);
   mqttClient.setCallback(callback);
 
   // Set up Buzzer 

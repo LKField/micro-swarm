@@ -14,22 +14,20 @@
 */
 
 #include <WiFi.h>
+//#include <WiFiClientSecure.h>
 #include <PubSubClient.h>
 #include "Config.h"
 #include "arduino_secrets.h"
 #include "pitches.h"
 
+// MQTT Setup names and topics 
 String clientName = "Swarm_Reference";
-
-// To connect to the Fab Lab BCN server 
-const char* mqttBroker = "mqtt-staging.smartcitizen.me";
 const char* mqttClientName = clientName.c_str();
-const char* mqttUser = "fablabbcn102";
-const char* mqttPass = "";
 const char* topicsToPub[] = {"lab/swarm/cell1", "lab/swarm/cell2", "lab/swarm/cell3"};
 const int topicsLength = 3;
 
 WiFiClient wifiClient;
+//WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 // Define frequency and message 
@@ -60,7 +58,7 @@ void mqttConnect() {
   while (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (mqttClient.connect(mqttClientName, mqttUser, mqttPass)) {
+    if (mqttClient.connect(mqttClientName, MQTTConfig::MQTT_USER, MQTTConfig::MQTT_PASS)) {
       Serial.println("connected");
 
       // Subscribing to topicsToPub[1] = "lab/swarm/cell2"
@@ -105,7 +103,7 @@ void setup()
   // Setup network
   setupWiFi();
 
-  mqttClient.setServer(mqttBroker, 1883);
+  mqttClient.setServer(MQTTConfig::MQTT_BROKER, MQTTConfig::MQTT_PORT);
   mqttClient.setCallback(callback);
 
 //  Allow the hardware to sort itself out

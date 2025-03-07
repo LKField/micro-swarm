@@ -24,6 +24,7 @@ class MQTTWrapper {
   private:
     // MQTT Client configuration
     const char* mqttBroker;
+    const int mqttPort;
     const char* mqttClientName;
     const char* mqttUser;
     const char* mqttPass;
